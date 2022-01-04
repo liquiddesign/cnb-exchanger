@@ -1,0 +1,31 @@
+{
+	"name": "liquiddesign/cnb-exchanger",
+	"description": "€ Nette služba pro převod měn dle ČNB",
+	"license": "MIT",
+	"autoload": {
+		"psr-4": {"Exchanger\\": "src/"}
+	},
+	"require" :
+	{
+		"php":">=7.4",
+		"nette/caching":"~3.0",
+		"nette/utils":"~3.0"
+	},
+	"require-dev": {
+		"nette/tester": "^2.0",
+		"phpstan/phpstan-nette": "^0.12",
+		"liquiddesign/codestyle": "~1.0",
+		"phpcompatibility/php-compatibility": "^9.3"
+	},
+	"scripts": {
+		"phpstan": "phpstan analyse --memory-limit 1G -c phpstan.neon",
+		"phpcs": "phpcs --standard=ruleset.xml ./src",
+		"phpcsfix": "phpcbf --standard=ruleset.xml ./src",
+		"phpcheck": "phpcs -p ./src --standard=vendor/phpcompatibility/php-compatibility/PHPCompatibility --runtime-set testVersion 8.0"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
+}
