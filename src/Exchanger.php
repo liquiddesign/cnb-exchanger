@@ -16,36 +16,25 @@ class Exchanger
 	
 	private string $cacheExpiration;
 	
-	private DateTime $exchangeDate;
-	
 	private string $rootCurrencyCode;
 	
 	public function __construct(Storage $storage, string $rootCurrencyCode = 'CZK', string $cacheExpiration = '1 hour')
 	{
 		$this->cache = new Cache($storage);
 		$this->cacheExpiration = $cacheExpiration;
-		$this->exchangeDate = new DateTime();
 		$this->rootCurrencyCode = $rootCurrencyCode;
 	}
 	
-	public function getExchangeDate(): ?DateTime
-	{
-		return $this->exchangeDate;
-	}
-	
-	public function setExchangeDate(?DateTime $exchangeDate): void
-	{
-		$this->exchangeDate = $exchangeDate ?? new DateTime();
-	}
-	
-	public function exchange(float $value, string $targetCurrency, string $fromCurrency = 'CZK'): float
+	public function exchange(float $value, string $targetCurrency, string $fromCurrency = 'CZK', ?DateTime $exchangeDate = null): float
 	{
 		if ($targetCurrency === $fromCurrency) {
 			return $value;
 		}
 		
-		$fromRate = $fromCurrency === $this->rootCurrencyCode ? 1 : $this->getRate($fromCurrency);
-		$targetRate = $targetCurrency === $this->rootCurrencyCode ? 1 : $this->getRate($targetCurrency);
+		$exchangeDate = $exchangeDate ?: new DateTime();
+		
+		$fromRate = $fromCurrency === $this->rootCurrencyCode ? 1 : $this->getRate($fromCurrency, $exchangeDate);
+		$targetRate = $targetCurrency === $this->rootCurrencyCode ? 1 : $this->getRate($targetCurrency, $exchangeDate);
 		
 		$czk = $value * $fromRate;
 		
@@ -57,7 +46,7 @@ class Exchanger
 	 */
 	public function getRateListContent(?DateTime $datetime = null): string
 	{
-		$datetime = $datetime ?: $this->exchangeDate;
+		$datetime = $datetime ?: new DateTime();
 		$date = $datetime->format('Y-m-d');
 		$cacheExpiration = $this->cacheExpiration;
 		
@@ -77,10 +66,10 @@ class Exchanger
 	/**
 	 * @throws \Throwable
 	 */
-	protected function getRate(string $targetCurrency): float
+	protected function getRate(string $targetCurrency, DateTime $exchangeDate): float
 	{
 		$match = null;
-		\preg_match('/' . $targetCurrency . '\|([0-9,]+)$/m', $this->getRateListContent($this->exchangeDate), $match);
+		\preg_match('/' . $targetCurrency . '\|([0-9,]+)$/m', $this->getRateListContent($exchangeDate), $match);
 		
 		$match = \preg_replace('/,/', '.', $match[1] ?? '');
 		
