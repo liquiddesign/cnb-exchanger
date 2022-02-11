@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Exchanger;
 
+use Carbon\Carbon;
 use Nette\Caching\Cache;
 use Nette\Caching\Storage;
-use Nette\Utils\DateTime;
 
 class Exchanger
 {
@@ -25,13 +25,13 @@ class Exchanger
 		$this->rootCurrencyCode = $rootCurrencyCode;
 	}
 	
-	public function exchange(float $value, string $targetCurrency, string $fromCurrency = 'CZK', ?DateTime $exchangeDate = null): float
+	public function exchange(float $value, string $targetCurrency, string $fromCurrency = 'CZK', ?Carbon $exchangeDate = null): float
 	{
 		if ($targetCurrency === $fromCurrency) {
 			return $value;
 		}
 		
-		$exchangeDate = $exchangeDate ?: new DateTime();
+		$exchangeDate = $exchangeDate ?: Carbon::now();
 		
 		$fromRate = $fromCurrency === $this->rootCurrencyCode ? 1 : $this->getRate($fromCurrency, $exchangeDate);
 		$targetRate = $targetCurrency === $this->rootCurrencyCode ? 1 : $this->getRate($targetCurrency, $exchangeDate);
@@ -44,9 +44,9 @@ class Exchanger
 	/**
 	 * @throws \Throwable
 	 */
-	public function getRateListContent(?DateTime $datetime = null): string
+	public function getRateListContent(?Carbon $datetime = null): string
 	{
-		$datetime = $datetime ?: new DateTime();
+		$datetime = $datetime ?: Carbon::now();
 		$date = $datetime->format('Y-m-d');
 		$cacheExpiration = $this->cacheExpiration;
 		
@@ -66,7 +66,7 @@ class Exchanger
 	/**
 	 * @throws \Throwable
 	 */
-	protected function getRate(string $targetCurrency, DateTime $exchangeDate): float
+	protected function getRate(string $targetCurrency, Carbon $exchangeDate): float
 	{
 		$match = null;
 		\preg_match('/' . $targetCurrency . '\|([0-9,]+)$/m', $this->getRateListContent($exchangeDate), $match);
