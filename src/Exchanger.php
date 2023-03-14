@@ -66,7 +66,7 @@ class Exchanger
 	/**
 	 * @throws \Throwable
 	 */
-	protected function getRate(string $targetCurrency, Carbon $exchangeDate): float
+	public function getRate(string $targetCurrency, Carbon $exchangeDate): float
 	{
 		$match = null;
 		\preg_match('/' . $targetCurrency . '\|([0-9,]+)$/m', $this->getRateListContent($exchangeDate), $match);
